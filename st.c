@@ -32,7 +32,7 @@
 #include <wchar.h>
 
 #include "arg.h"
-
+#include "base64dec.c"
 char *argv0;
 
 #define Glyph Glyph_
@@ -2599,11 +2599,21 @@ strhandle(void)
 			if (narg > 1)
 				xsettitle(strescseq.args[1]);
 			return;
-		case 4: /* color set */
+		case 52:/*set tmux clipboard*/
+			if (narg > 2){
+				char *src=strescseq.args[2];
+				size_t l = (strlen(src)/4)*3;
+				char *buf=xmalloc(l+1);
+				base64dec(buf, src, l);
+				xsetsel(buf, CurrentTime);
+			}
+			return;
+			case 4: /* color set */
 			if (narg < 3)
 				break;
 			p = strescseq.args[2];
 			/* FALLTHROUGH */
+
 		case 104: /* color reset, here p = NULL */
 			j = (narg > 1) ? atoi(strescseq.args[1]) : -1;
 			if (xsetcolorname(j, p)) {
